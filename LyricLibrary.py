@@ -23,6 +23,12 @@ class LyricLibrary:
         ngrams = self.generate_ngrams(lyrics)
 
     def generate_ngrams(self, lyrics: List[str]) -> List[List[str]]:
+        """ Create a list of n-grams for one song.
+        lyrics: a list of strings representing the lyrics in one song
+        returns: the n-grams, represented by a list of list of strings
+        Example:
+            ["I" "am" "cool"] -> [["I"], ["I", "am"], ["I", "am", "cool"], ["am"], ["am", "cool"], ["cool"]]
+            """
         n_size = 5
         output = []
 
