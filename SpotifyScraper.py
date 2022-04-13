@@ -5,12 +5,13 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-with open('client_secrets.json') as f:
-    secrets = json.load(f)
+def loadSpotifyKeys(secrets):
+    with open(secrets) as f:
+        secrets = json.load(f)
 
-os.environ['SPOTIPY_CLIENT_ID'] = secrets["Client_ID"]
-os.environ['SPOTIPY_CLIENT_SECRET'] = secrets["Secret"]
-os.environ['SPOTIPY_REDIRECT_URI'] = secrets["URL"]
+    os.environ['SPOTIPY_CLIENT_ID'] = secrets["Client_ID"]
+    os.environ['SPOTIPY_CLIENT_SECRET'] = secrets["Secret"]
+    os.environ['SPOTIPY_REDIRECT_URI'] = secrets["URL"]
 
 def getSpotifyTracks(sp, genres, perGenre=20):
     track_dict = {}
@@ -30,6 +31,7 @@ def getSpotifyTracks(sp, genres, perGenre=20):
     return df
 
 def main():
+    loadSpotifyKeys('client_secrets.json')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
     genres = sp.recommendation_genre_seeds()
     df = getSpotifyTracks(sp, genres)
