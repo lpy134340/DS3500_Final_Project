@@ -1,6 +1,8 @@
 from typing import List
 
 import pandas as pd
+import re
+import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 
@@ -9,13 +11,34 @@ class LyricLibrary:
     """Lyric Library provides NLP tools for song analysis.
     This class can download song data from spotify and genius.
     """
-    # song_data = pd.DataFrame(columns=["Song", "Artist", "Genre", "Category", "Lyrics"])
+    # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
     song_data = pd.read_csv("lyrics_sample.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
 
     lyric_ngram_data = pd.DataFrame(columns=["Song", "1-Gram", "2-Gram", "3-Gram"])
     # TODO: data cleaning, things other than the NAs, e.g. punctuation marks, remove the chorus stuff?
 
     lyrics = song_data['lyrics']
+
+    def clean_lyrics(self) -> None:
+        """ Remove lyric annotations such as [Chorus] [Verse 1]..
+            Remove punctuation
+            Remove "Embed" from end of every song
+            Remove digits
+            Clean lyrics, separate lyrics from one string to a list of strings.
+        """
+        for index in range(len(self.song_data)):
+            song = self.song_data.iloc[index]
+            song['lyrics'] = re.sub("[\(\[].*?[\)\]]", "", song['lyrics'])
+            song['lyrics'] = song['lyrics'].translate(str.maketrans('', '', string.punctuation))
+            song['lyrics'] = song['lyrics'].replace("Embed", "")
+            song['lyrics'] = song['lyrics'].translate(str.maketrans('', '', string.digits))
+            song['lyrics'] = song['lyrics'].split()
+
+    def remove_stop_words(self, file) -> None:
+        """Load a file of stopwords and remove said stopwords from lyrics data"""
+        stopwords = file
+        for song in self.song_data:
+            song["lyrics"] = [word for word in song["lyrics"] if word not in stopwords]
 
     # TODO: do we still need this method?
     def load_song(self, song_name: str) -> None:
@@ -60,7 +83,7 @@ class LyricLibrary:
         lyrics_weights["lyrics"] = self.lyrics
         lyrics_weights.set_index("lyrics", inplace=True)
         print(lyrics_weights)
-        #print(vect.get_feature_names_out())
+        # print(vect.get_feature_names_out())
 
     def ML_pipeline(self, models):
         """
@@ -87,16 +110,15 @@ class LyricLibrary:
 
 
 if __name__ == "__main__":
-
     library = LyricLibrary()
-    #print(library.song_data)
-    #print(library.lyrics)
+    library.clean_lyrics()
+    # print(library.song_data)
+    # print(library.lyrics)
 
-    # run n-grams
-    # lyrics = ["the", "other", "day", "I", "did", "a", "thing", "and", "it", "was", "cool"]
-    print(library.lyrics[0])
-    n_grams = library.generate_ngrams(library.lyrics)
+    # print(library.lyrics[0])
+    # n_grams = library.generate_ngrams(library.lyrics)
     # print(n_grams)
+    print((library.song_data['lyrics'][0]))
 
     # run tf-idf
     # tfidf = library.tfidf()
