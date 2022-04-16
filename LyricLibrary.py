@@ -4,17 +4,20 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 
+
 class LyricLibrary:
     """Lyric Library provides NLP tools for song analysis.
     This class can download song data from spotify and genius.
     """
-    song_data = pd.DataFrame(columns=["Song", "Artist", "Genre", "Category", "Lyrics"])
+    # song_data = pd.DataFrame(columns=["Song", "Artist", "Genre", "Category", "Lyrics"])
+    song_data = pd.read_csv("lyrics_sample.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+
     lyric_ngram_data = pd.DataFrame(columns=["Song", "1-Gram", "2-Gram", "3-Gram"])
+    # TODO: data cleaning, things other than the NAs, e.g. punctuation marks, remove the chorus stuff?
 
-    # TODO: to change when we have the data
-    #lyrics = song_data['Lyrics']
-    lyrics = ["hello world hello", "what's up"]
+    lyrics = song_data['lyrics']
 
+    # TODO: do we still need this method?
     def load_song(self, song_name: str) -> None:
         # load song info from spotify, lyrics from genius
         # add info and lyrics to self.song_data
@@ -46,20 +49,27 @@ class LyricLibrary:
 
     # create weights df for all the lyrics
     def tfidf(self):
-        # TODO: double check if this is right
-
+        # TODO: someone else double check if this is right
         vect = TfidfVectorizer()
         X = vect.fit_transform(self.lyrics)
         print(vect.get_feature_names_out())
         print(X.shape)
 
         # get the weights
-        lyrics_weights = pd.DataFrame(X.toarray(), columns = vect.get_feature_names_out())
+        lyrics_weights = pd.DataFrame(X.toarray(), columns=vect.get_feature_names_out())
         lyrics_weights["lyrics"] = self.lyrics
         lyrics_weights.set_index("lyrics", inplace=True)
         print(lyrics_weights)
+        #print(vect.get_feature_names_out())
 
     def ML_pipeline(self, models):
+        """
+        outcome -> genere
+        lyrics
+            -> n-grams
+            -> tfidf
+        basic classification one
+        """
         # data loading
 
         # train test split
@@ -71,12 +81,22 @@ class LyricLibrary:
 
         return
 
+    # most influential feature
     def ngram_feature_extraction(self, genre, category):
         return
 
+
 if __name__ == "__main__":
+
     library = LyricLibrary()
-    #lyrics = ["the", "other", "day", "I", "did", "a", "thing", "and", "it", "was", "cool"]
-    #n_grams = library.generate_ngrams(lyrics) # generate n-grams for one song?
-    #print(n_grams)
-    tfidf = library.tfidf()
+    #print(library.song_data)
+    #print(library.lyrics)
+
+    # run n-grams
+    # lyrics = ["the", "other", "day", "I", "did", "a", "thing", "and", "it", "was", "cool"]
+    print(library.lyrics[0])
+    n_grams = library.generate_ngrams(library.lyrics)
+    # print(n_grams)
+
+    # run tf-idf
+    # tfidf = library.tfidf()
