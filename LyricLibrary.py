@@ -5,6 +5,8 @@ import re
 import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
+import nltk
+from nltk.corpus import stopwords
 
 
 class LyricLibrary:
@@ -34,13 +36,14 @@ class LyricLibrary:
             song['lyrics'] = song['lyrics'].translate(str.maketrans('', '', string.digits))
             song['lyrics'] = song['lyrics'].split()
 
-    def remove_stop_words(self, file) -> None:
-        """Load a file of stopwords and remove said stopwords from lyrics data"""
-        stopwords = file
-        for song in self.song_data:
-            song["lyrics"] = [word for word in song["lyrics"] if word not in stopwords]
+    def remove_stop_words(self) -> None:
+        """Load a list of stopwords and remove said stopwords from lyrics data"""
+        stop_words = stopwords.words('english')
+        for index in range(len(self.song_data)):
+            song = self.song_data.iloc[index]
+            song["lyrics"] = [word for word in song["lyrics"] if word not in stop_words]
 
-    # TODO: do we still need this method?
+    # TODO: do we still need this method? -no
     def load_song(self, song_name: str) -> None:
         # load song info from spotify, lyrics from genius
         # add info and lyrics to self.song_data
@@ -112,6 +115,7 @@ class LyricLibrary:
 if __name__ == "__main__":
     library = LyricLibrary()
     library.clean_lyrics()
+    library.remove_stop_words()
     # print(library.song_data)
     # print(library.lyrics)
 
