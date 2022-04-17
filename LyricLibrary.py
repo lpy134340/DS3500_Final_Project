@@ -6,11 +6,12 @@ import string
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import train_test_split
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from sklearn.neighbors import KNeighborsClassifier
 
 
 class LyricLibrary:
@@ -19,6 +20,10 @@ class LyricLibrary:
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
     song_data = pd.read_csv("lyrics_sample.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+    # Accuracy results
+    knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
+    # TODO: Should we use min_sample_split?
+    random_forest_results = pd.DataFrame(columns=["Max Depth", "Accuracy"])
 
     # TODO: data cleaning, things other than the NAs, e.g. punctuation marks, remove the chorus stuff?
 
@@ -58,68 +63,91 @@ class LyricLibrary:
     # create weights df for all the lyrics
     def tfidf(self):
         # TODO: someone else double check if this is right
-        vect = TfidfVectorizer(ngram_range=(1,3))
+        vect = TfidfVectorizer(ngram_range=(1, 3))
         X = vect.fit_transform(self.lyrics)
-        print(vect.get_feature_names_out())
-        print(X.shape)
 
         # get the weights
         lyrics_weights = pd.DataFrame(X.toarray(), columns=vect.get_feature_names_out())
         lyrics_weights["lyrics"] = self.lyrics
         lyrics_weights.set_index("lyrics", inplace=True)
-        print(lyrics_weights)
         # print(vect.get_feature_names_out())
 
-    def ML_pipeline(self, models):
+    # fits data, prepares X_trai x_test y_train
+
+    # RandomFOrest(X_train) -> results
+
+    # KNN(X_Train) -> results
+
+    # [models]
+    # SKLearn Classifier -> df
+    def ML_pipeline(self, classifier):
         """
-        outcome -> genere
-        lyrics
-            -> n-grams
-            -> tfidf
-        basic classification one
+            Trains the data and fits it to a given classifier. Returns the results as a dataframe
+            with precision and recall per genre.
         """
         # TODO: https://www.kaggle.com/code/neerajmohan/nlp-text-classification-using-tf-idf-features/notebook
-        # data loading
 
         # train test split
         # X_train, X_test, y_train, y_test = train_test_split(features, target, random_state=)
-        X_train, X_test, y_train, y_test = train_test_split(self.lyrics, self.song_data['genre'], test_size=.2, random_state = 123)
+        X_train, X_test, y_train, y_test = train_test_split(self.lyrics, self.song_data['genre'], test_size=.2,
+                                                            random_state=123)
 
         # run ML
-        tfidf_vectorizer = TfidfVectorizer(ngram_range=(1,3))
+        tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 3))
         tfidf_train_vectors = tfidf_vectorizer.fit_transform(X_train)
         tfidf_test_vectors = tfidf_vectorizer.transform(X_test)
-
-        classifier = RandomForestClassifier()
-
         classifier.fit(tfidf_train_vectors, y_train)
 
         # evaluate
         y_pred = classifier.predict(tfidf_test_vectors)
-        print(classification_report(y_pred, y_test))
 
-        return
+        test_accuracy = accuracy_score(y_test, y_pred)
+        return test_accuracy
 
     # most influential feature
     def ngram_feature_extraction(self, genre, category):
+        return
+
+    def run_all_models(self, models: dict):
+        """Runs a collection of models with different parameters and saves their results"""
+        for n in models["knn"]:
+            knn = KNeighborsClassifier(n_neighbors=n)
+            score = self.ML_pipeline(knn)
+            result = {"Number Neighbors": n, "Accuracy": score}
+            self.knn_results = self.knn_results.append(result, ignore_index=True)
+        for depth in models["forest"]:
+            random_forest = RandomForestClassifier(max_depth=depth)
+            score = self.ML_pipeline(random_forest)
+            result = {"Max Depth": depth, "Accuracy": score}
+            self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
         return
 
 
 if __name__ == "__main__":
     library = LyricLibrary()
     library.clean_lyrics()
-    #library.remove_stop_words()
+    # library.remove_stop_words()
 
     library.tfidf()
 
-    library.ML_pipeline("models")
+    score = library.ML_pipeline(RandomForestClassifier())
+    print(score)
+    sample_models = {
+        "knn": [3, 5, 7, 9, 11],
+        "forest": [4, 5, 6]
+    }
+    library.run_all_models(sample_models)
+
+    print(library.knn_results)
+    print(library.random_forest_results)
+
+
     # print(library.song_data)
     # print(library.lyrics)
 
     # print(library.lyrics[0])
     # n_grams = library.generate_ngrams(library.lyrics)
     # print(n_grams)
-
 
     # run tf-idf
     # tfidf = library.tfidf()
