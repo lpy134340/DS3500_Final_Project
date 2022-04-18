@@ -12,6 +12,8 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.neighbors import KNeighborsClassifier
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class LyricLibrary:
@@ -118,6 +120,26 @@ class LyricLibrary:
             result = {"Max Depth": depth, "Accuracy": score}
             self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
         return
+
+    def plot_model_accuracy(self):
+        """Plot the accruacy of KNN models with different number of neighbors"""
+        xs = self.knn_results["Number Neighbors"]
+        y1 = self.knn_results["Accuracy"]
+
+        sns.set_style('dark')
+        f, ax = plt.subplots(figsize=(7, 6))
+
+        sns.scatterplot(x=xs, y=y1, s=5, color="blue")
+        sns.lineplot(x=xs, y=y1, color="blue")
+
+        plt.grid()
+        plt.xlim(0, max(xs) * 1.2)
+
+        plt.xlabel("Number of Neighbors")
+        plt.ylabel("Accuracy %")
+        plt.title("Accuracy of KNN Models Predicting Song Genre by lyric")
+        plt.savefig("knn_accuracy.png", bbox_inches='tight')
+        plt.show()
 
 
 if __name__ == "__main__":
