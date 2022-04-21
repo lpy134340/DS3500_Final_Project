@@ -141,11 +141,11 @@ if __name__ == "__main__":
     library.clean_lyrics()
     #library.remove_stop_words()
 
-    library.tfidf()
+    #library.tfidf()
 
-    library.ML_pipeline("models")
+    #library.ML_pipeline("models")
     # print(library.song_data)
-    # print(library.lyrics)
+    print(library.lyrics)
 
     # print(library.lyrics[0])
     # n_grams = library.generate_ngrams(library.lyrics)
