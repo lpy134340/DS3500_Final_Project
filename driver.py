@@ -15,7 +15,7 @@ if __name__ == "__main__":
     spotify_df = getSpotifyTracks(sp, genres, perGenre=3)
     print("did we finish spotify")
     # get genius api data
-    genius = lg.Genius(spotify_api_key)
+    genius = lg.Genius(spotify_api_key, timeout=15, retries=2)
     song_df = get_song_lyrics(spotify_df, genius)
     print(song_df)
     
