@@ -12,8 +12,8 @@ if __name__ == "__main__":
     loadSpotifyKeys('client_secrets.json')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
     genres = sp.recommendation_genre_seeds()
-    spotify_df = getSpotifyTracks(sp, genres, perGenre=1)
-
+    spotify_df = getSpotifyTracks(sp, genres, perGenre=3)
+    print("did we finish spotify")
     # get genius api data
     genius = lg.Genius(spotify_api_key)
     song_df = get_song_lyrics(spotify_df, genius)
