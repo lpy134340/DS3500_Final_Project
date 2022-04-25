@@ -22,7 +22,7 @@ class LyricLibrary:
     This class can download song data from spotify and genius.
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
-    song_data = pd.read_csv("lyrics_200_per.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+    song_data = pd.read_csv("lyrics_5000.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
     # Accuracy results
     knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
     # TODO: Should we use min_sample_split?
@@ -35,8 +35,7 @@ class LyricLibrary:
         specific_to_general = get_specific_to_general()
         for index in range(len(self.song_data)):
             new_genre = specific_to_general[self.song_data.iloc[index]['genre']]
-            if new_genre == 'removed'
-
+            self.song_data.iloc[index]['genre'] = new_genre
 
     def clean_lyrics(self) -> None:
         """ Remove lyric annotations such as [Chorus] [Verse 1]..
@@ -63,7 +62,7 @@ class LyricLibrary:
             # Convert string to list of strings, remove stopwords, and lemmatize
             lyrics_as_list = song['lyrics'].split()
             lyrics_as_list = [word for word in lyrics_as_list if word not in stop_words]
-            lyrics_as_list= [lemmatizer.lemmatize(word) for word in lyrics_as_list]
+            lyrics_as_list = [lemmatizer.lemmatize(word) for word in lyrics_as_list]
             # convert back from list of strings to string
             song['lyrics'] = " ".join(lyrics_as_list)
 
@@ -171,14 +170,15 @@ class LyricLibrary:
         plt.show()
 
 
-
 if __name__ == "__main__":
     library = LyricLibrary()
+    print(len(library.song_data))
+    library.generalize_genres()
     library.clean_lyrics()
 
-    #library.tfidf()
+    # library.tfidf()
 
-    #library.ML_pipeline("models")
+    # library.ML_pipeline("models")
     # print(library.song_data)
     print(len(library.lyrics))
     print(library.lyrics)
@@ -188,8 +188,8 @@ if __name__ == "__main__":
     # print(n_grams)
 
     sample_models = {
-        "knn": [3, 5, 7, 9, 11],
-        "forest": [4, 5, 6]
+        "knn": [3, 5, 7, 9, 11, 13, 15],
+        "forest": [2, 3, 4, 5, 6, 7]
     }
     library.run_all_models(sample_models)
     print(library.knn_results)
