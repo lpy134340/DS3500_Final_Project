@@ -12,14 +12,14 @@ if __name__ == "__main__":
     loadSpotifyKeys('client_secrets.json')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
     genres = sp.recommendation_genre_seeds()
-    spotify_df = getSpotifyTracks(sp, genres, perGenre=3)
-    print("did we finish spotify")
+    spotify_df = getSpotifyTracks(sp, genres, perGenre=100)
+
     # get genius api data
-    genius = lg.Genius(spotify_api_key, timeout=15, retries=2)
+    genius = lg.Genius(spotify_api_key, timeout=15, retries=3)
     song_df = get_song_lyrics(spotify_df, genius)
     print(song_df)
     
-    # song_df.to_csv("lyrics_sample.csv")
+    song_df.to_csv("lyrics_200_per.csv")
 
     # library = LyricLibrary()
     # # lyrics = ["the", "other", "day", "I", "did", "a", "thing", "and", "it", "was", "cool"]

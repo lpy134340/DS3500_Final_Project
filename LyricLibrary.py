@@ -14,6 +14,7 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
+from SpotifyScraper import general_genres, get_specific_to_general
 
 
 class LyricLibrary:
@@ -21,13 +22,21 @@ class LyricLibrary:
     This class can download song data from spotify and genius.
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
-    song_data = pd.read_csv("lyrics_sample.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+    song_data = pd.read_csv("lyrics_200_per.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
     # Accuracy results
     knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
     # TODO: Should we use min_sample_split?
     random_forest_results = pd.DataFrame(columns=["Max Depth", "Accuracy"])
 
     lyrics = song_data['lyrics']
+
+    def generalize_genres(self):
+        """remove specific genre classifications and replace with generic umbrella genres"""
+        specific_to_general = get_specific_to_general()
+        for index in range(len(self.song_data)):
+            new_genre = specific_to_general[self.song_data.iloc[index]['genre']]
+            if new_genre == 'removed'
+
 
     def clean_lyrics(self) -> None:
         """ Remove lyric annotations such as [Chorus] [Verse 1]..
@@ -69,7 +78,7 @@ class LyricLibrary:
     # create weights df for all the lyrics
     # TODO: deprecated, tfidf handled in ML_pipeline
     def tfidf(self):
-        vect = TfidfVectorizer(ngram_range=(1, 3))
+        vect = TfidfVectorizer(ngram_range=(3, 3))
         X = vect.fit_transform(self.lyrics)
 
         # get the weights
@@ -100,7 +109,7 @@ class LyricLibrary:
         y_pred = classifier.predict(tfidf_test_vectors)
 
         test_accuracy = accuracy_score(y_test, y_pred)
-        return test_accuracy
+        return test_accuracy * 100
 
     # most influential feature
     def ngram_feature_extraction(self, genre, category):
@@ -109,7 +118,7 @@ class LyricLibrary:
     def run_all_models(self, models: dict):
         """Runs a collection of models with different parameters and saves their results"""
         for n in models["knn"]:
-            knn = KNeighborsClassifier(n_neighbors=n)
+            knn = KNeighborsClassifier(n_neighbors=n, metric='cosine')
             score = self.ML_pipeline(knn)
             result = {"Number Neighbors": n, "Accuracy": score}
             # TODO: Suppress Warning for frame.append
@@ -141,6 +150,27 @@ class LyricLibrary:
         plt.savefig("knn_accuracy.png", bbox_inches='tight')
         plt.show()
 
+    def plot_model_accuracy_forest(self):
+        """Plot the accruacy of KNN models with different number of neighbors"""
+        xs = self.random_forest_results["Max Depth"]
+        y1 = self.random_forest_results["Accuracy"]
+
+        sns.set_style('dark')
+        f, ax = plt.subplots(figsize=(7, 6))
+
+        sns.scatterplot(x=xs, y=y1, s=5, color="blue")
+        sns.lineplot(x=xs, y=y1, color="blue")
+
+        plt.grid()
+        plt.xlim(0, max(xs) * 1.2)
+
+        plt.xlabel("Max Depth")
+        plt.ylabel("Accuracy %")
+        plt.title("Accuracy of Random Forest Models vs Max Depth")
+        plt.savefig("forest_accuracy.png", bbox_inches='tight')
+        plt.show()
+
+
 
 if __name__ == "__main__":
     library = LyricLibrary()
@@ -150,6 +180,7 @@ if __name__ == "__main__":
 
     #library.ML_pipeline("models")
     # print(library.song_data)
+    print(len(library.lyrics))
     print(library.lyrics)
 
     # print(library.lyrics[0])
@@ -163,3 +194,6 @@ if __name__ == "__main__":
     library.run_all_models(sample_models)
     print(library.knn_results)
     print(library.random_forest_results)
+
+    library.plot_model_accuracy()
+    library.plot_model_accuracy_forest()

@@ -21,9 +21,9 @@ def get_song_lyrics(spotify_df, genius):
         #print(song_title)
         try:
             song = genius.search_song(song_title, artist)
-        except socket.timeout:
-            print("next")
-            continue
+        except:
+            print("NEXT")
+
         if song == None:
             lyrics = ""
         else:
@@ -32,11 +32,11 @@ def get_song_lyrics(spotify_df, genius):
             lyrics = "lyrics".join(lyrics)
 
         lyrics_list.append(lyrics)
-        if i % 5 == 0:
+        if i % 50 == 0:
             print(i)
         time.sleep(.5)
 
-    print(lyrics_list)
+    #print(lyrics_list)
     spotify_df["lyrics"] = lyrics_list
 
     return spotify_df

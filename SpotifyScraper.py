@@ -5,6 +5,41 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+general_genres = {"acoustic": ["acoustic", "guitar", "piano"],
+                  "rock": ["alt-rock", "alternative", "emo", "goth", "grunge", "hard-rock", "industrial",
+                           "psych-rock", "punk", "punk-rock", "rock", "rock-n-roll"],
+                  "metal": ["black-metal", "death-metal", "heavy-metal", "metal", "metal-misc", "metalcore"],
+                  "country": ["bluegrass", "country", "folk", "honky-tonk", "rockabilly"],
+                  "jazz": ["blues", "jazz"],
+                  "world-music": ["cantopop", "french", "german", "indian", "iranian", "k-pop", "malay", "mandopop",
+                                  "philippines-opm", "swedish", "turkish", "world-music"],
+                  "brazil": ["bossanova", "brazil", "forro", "mpb", "pagode", "samba", "sertanejo"],
+                  "japanese": ["j-dance", "j-idol", "j-pop", "j-rock"],
+                  "spanish": ["spanish", "latin", "latino", "salsa", "tango"],
+                  "electronic": ["breakbeat", "chicago-house", "club", "dance", "deep-house", "detroit-techno",
+                                 "disco", "drum-and-bass", "dub", "dubstep", "edm", "electro", "electronic",
+                                 "garage", "grindcore", "hardcore", "hardstyle", "house", "idm", "minimal-techno",
+                                 "party", "post-dubstep", "progressive-house", "techno", "trance"],
+                  "classical": ["classical", "opera"],
+                  "reggae": ["dancehall", "reggae", "reggaeton", "ska"],
+                  "hip-hop": ["hip-hop", "trip-hop"],
+                  "pop": ["indie", "indiepop", "new-age", "pop", "pop-film", "power-pop", "synth-pop"],
+                  "soul": ["soul", "funk", "gospel", "groove", "afrobeat"],
+                  "children": ["cildren", "disney", "kids"],
+                  "removed": ["ambient", "anime", "chill", "comedy", "happy", "holidays", "movies", "new-release",
+                              "rainy-day", "road-trip", "romance", "sad", "showtunes", "singer-songwriter", "sleep",
+                              "songwriter", "soundtracks", "study", "summer", "work-out"]
+
+                  }
+
+def get_specific_to_general():
+    """Compute the inverse of the general_genre dictionary"""
+    output = {}
+    for key in general_genres.keys():
+        for value in general_genres[key]:
+            output[value] = key
+    return output
+
 def loadSpotifyKeys(secrets):
     with open(secrets) as f:
         secrets = json.load(f)
@@ -66,6 +101,8 @@ def main():
                'study', 'summer', 'soundtracks', 'road-trip', 'reggae', 'reggaeton', 'happy','sad', 'sertanejo',
                'singer-songwriter', 'ska', 'sleep', 'songwriter', 'malay', 'mandopop',]
     other_languages = []
+
+
     # TODO: should we remove other languages too? or consolidate as "world-music"
 
     loadSpotifyKeys('client_secrets.json')
