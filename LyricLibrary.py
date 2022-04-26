@@ -188,8 +188,8 @@ if __name__ == "__main__":
     # print(n_grams)
 
     sample_models = {
-        "knn": [3, 5, 7, 9, 11, 13, 15],
-        "forest": [2, 3, 4, 5, 6, 7]
+        "knn": [3, 5, 7, 9, 11, 13, 15, 17, 19],
+        "forest": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     }
     library.run_all_models(sample_models)
     print(library.knn_results)
