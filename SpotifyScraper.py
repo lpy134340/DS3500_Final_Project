@@ -27,11 +27,12 @@ general_genres = {"acoustic": ["acoustic", "guitar", "piano"],
                   "soul": ["soul", "gospel", "afrobeat"],
                   "r-n-b": ["funk", "r-n-b"],
                   "children": ["children", "disney", "kids"],
-                  "misc": ["ambient", "anime", "chill", "comedy", "happy", "holidays", "movies", "new-release",
-                              "rainy-day", "road-trip", "romance", "sad", "show-tunes", "singer-songwriter", "sleep",
-                              "songwriter", "soundtracks", "study", "summer", "work-out"]
 
                   }
+# removed genres
+# "misc": ["ambient", "anime", "chill", "comedy", "happy", "holidays", "movies", "new-release",
+#                               "rainy-day", "road-trip", "romance", "sad", "show-tunes", "singer-songwriter", "sleep",
+#                               "songwriter", "soundtracks", "study", "summer", "work-out"]
 
 def get_specific_to_general():
     """Compute the inverse of the general_genre dictionary"""

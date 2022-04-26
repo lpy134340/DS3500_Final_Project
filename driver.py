@@ -6,12 +6,16 @@ import lyricsgenius as lg
 from api_key import spotify_api_key
 from LyricLibrary import main as lyric_library_main
 import pandas as pd
+from SpotifyScraper import general_genres
 
 if __name__ == "__main__":
     # get spotify api data
     loadSpotifyKeys('client_secrets.json')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth())
-    genres = sp.recommendation_genre_seeds()
+
+    genres = {"genres": sum(list(general_genres.values()), [])}
+
+    print(genres)
     spotify_df = getSpotifyTracks(sp, genres, perGenre=100)
 
     # get genius api data

@@ -103,7 +103,7 @@ class LyricLibrary:
                 self.knn_results = self.knn_results.append(result, ignore_index=True)
         if "forest" in models.keys():
             for depth in models["forest"]:
-                random_forest = RandomForestClassifier(max_depth=depth, min_samples_split=5)
+                random_forest = RandomForestClassifier(max_depth=depth, min_samples_split=3)
                 score = self.ML_pipeline(random_forest)
                 result = {"Max Depth": depth, "Accuracy": score}
                 self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
@@ -171,6 +171,7 @@ def main():
 
     library.plot_model_accuracy()
     library.plot_model_accuracy_forest()
+
 
 if __name__ == "__main__":
     main()
