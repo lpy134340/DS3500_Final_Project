@@ -20,12 +20,12 @@ from SpotifyScraper import general_genres, get_specific_to_general
 class LyricLibrary:
     """Lyric Library provides NLP tools for song analysis.
     This class can download song data from spotify and genius.
+    The Machine Learning pipeline creates a ML model to predict genre based on lyrics
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
     song_data = pd.read_csv("lyrics_5000.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
     # Accuracy results
     knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
-    # TODO: Should we use min_sample_split?
     random_forest_results = pd.DataFrame(columns=["Max Depth", "Accuracy"])
 
     lyrics = song_data['lyrics']
@@ -66,40 +66,17 @@ class LyricLibrary:
             # convert back from list of strings to string
             song['lyrics'] = " ".join(lyrics_as_list)
 
-    # TODO: Deprecated method, stopwords are removed in clean_lyrics
-    def remove_stop_words(self) -> None:
-        """Load a list of stopwords and remove said stopwords from lyrics data"""
-        stop_words = stopwords.words('english')
-        for index in range(len(self.song_data)):
-            song = self.song_data.iloc[index]
-            song["lyrics"] = [word for word in song["lyrics"] if word not in stop_words]
-
-    # create weights df for all the lyrics
-    # TODO: deprecated, tfidf handled in ML_pipeline
-    def tfidf(self):
-        vect = TfidfVectorizer(ngram_range=(3, 3))
-        X = vect.fit_transform(self.lyrics)
-
-        # get the weights
-        lyrics_weights = pd.DataFrame(X.toarray(), columns=vect.get_feature_names_out())
-        lyrics_weights["lyrics"] = self.lyrics
-        lyrics_weights.set_index("lyrics", inplace=True)
-        # print(vect.get_feature_names_out())
-
     # SKLearn Classifier -> Double
     def ML_pipeline(self, classifier):
         """
-            Trains the data and fits it to a given classifier. Returns the results as a dataframe
-            with precision and recall per genre.
+            Trains the data and fits it to a given classifier. Returns the accuracy as a percent
         """
-        # TODO: https://www.kaggle.com/code/neerajmohan/nlp-text-classification-using-tf-idf-features/notebook
-
         # train test split
         # X_train, X_test, y_train, y_test = train_test_split(features, target, random_state=)
         X_train, X_test, y_train, y_test = train_test_split(self.lyrics, self.song_data['genre'], test_size=.2,
                                                             random_state=123)
         # run ML
-        tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 3))
+        tfidf_vectorizer = TfidfVectorizer(ngram_range=(2, 3))
         tfidf_train_vectors = tfidf_vectorizer.fit_transform(X_train)
         tfidf_test_vectors = tfidf_vectorizer.transform(X_test)
         classifier.fit(tfidf_train_vectors, y_train)
@@ -112,21 +89,24 @@ class LyricLibrary:
 
     # most influential feature
     def ngram_feature_extraction(self, genre, category):
+        # TODO
         return
 
     def run_all_models(self, models: dict):
         """Runs a collection of models with different parameters and saves their results"""
-        for n in models["knn"]:
-            knn = KNeighborsClassifier(n_neighbors=n, metric='cosine')
-            score = self.ML_pipeline(knn)
-            result = {"Number Neighbors": n, "Accuracy": score}
-            # TODO: Suppress Warning for frame.append
-            self.knn_results = self.knn_results.append(result, ignore_index=True)
-        for depth in models["forest"]:
-            random_forest = RandomForestClassifier(max_depth=depth)
-            score = self.ML_pipeline(random_forest)
-            result = {"Max Depth": depth, "Accuracy": score}
-            self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
+        if "knn" in models.keys():
+            for n in models["knn"]:
+                knn = KNeighborsClassifier(n_neighbors=n, metric='cosine')
+                score = self.ML_pipeline(knn)
+                result = {"Number Neighbors": n, "Accuracy": score}
+                # TODO: Suppress Warning for frame.append
+                self.knn_results = self.knn_results.append(result, ignore_index=True)
+        if "forest" in models.keys():
+            for depth in models["forest"]:
+                random_forest = RandomForestClassifier(max_depth=depth, min_samples_split=5)
+                score = self.ML_pipeline(random_forest)
+                result = {"Max Depth": depth, "Accuracy": score}
+                self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
         return
 
     def plot_model_accuracy(self):
@@ -150,7 +130,7 @@ class LyricLibrary:
         plt.show()
 
     def plot_model_accuracy_forest(self):
-        """Plot the accruacy of KNN models with different number of neighbors"""
+        """Plot the accuracy of KNN models with different number of neighbors"""
         xs = self.random_forest_results["Max Depth"]
         y1 = self.random_forest_results["Accuracy"]
 
@@ -170,30 +150,27 @@ class LyricLibrary:
         plt.show()
 
 
-if __name__ == "__main__":
+def main():
+    """Create a LyricLibrary, clean its data, run some ML models and plot the accuracy"""
     library = LyricLibrary()
-    print(len(library.song_data))
-    library.generalize_genres()
-    library.clean_lyrics()
 
-    # library.tfidf()
-
-    # library.ML_pipeline("models")
-    # print(library.song_data)
-    print(len(library.lyrics))
-    print(library.lyrics)
-
-    # print(library.lyrics[0])
-    # n_grams = library.generate_ngrams(library.lyrics)
-    # print(n_grams)
+    library.generalize_genres()  # consolidate genres to more general terms
+    library.clean_lyrics()  # clean data
 
     sample_models = {
         "knn": [3, 5, 7, 9, 11, 13, 15, 17, 19],
         "forest": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     }
-    library.run_all_models(sample_models)
+    random_forest_deep = {
+        "forest": [12, 13, 14, 15, 16, 17, 18, 19, 20]
+    }
+    library.run_all_models(sample_models)  # run all knn and forest models
+
     print(library.knn_results)
     print(library.random_forest_results)
 
     library.plot_model_accuracy()
     library.plot_model_accuracy_forest()
+
+if __name__ == "__main__":
+    main()
