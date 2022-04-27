@@ -23,7 +23,7 @@ class LyricLibrary:
     The Machine Learning pipeline creates a ML model to predict genre based on lyrics
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
-    song_data = pd.read_csv("full_lyric_dataset.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+    song_data = pd.read_csv("Data/full_lyric_dataset.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
     # Accuracy results
     knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
     random_forest_results = pd.DataFrame(columns=["Max Depth", "Accuracy"])

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     song_df = get_song_lyrics(spotify_df, genius)
     print(song_df)
 
-    song_df.to_csv("full_lyric_dataset.csv")
+    song_df.to_csv("Data/full_lyric_dataset.csv")
 
     # Run the Lyric Library main method to generate machine learning models
-    # lyric_library_main()
+    lyric_library_main()
