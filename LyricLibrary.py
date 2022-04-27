@@ -23,7 +23,7 @@ class LyricLibrary:
     The Machine Learning pipeline creates a ML model to predict genre based on lyrics
     """
     # columns = ['name', 'artists', 'genre', 'spotifyID', 'lyrics']
-    song_data = pd.read_csv("lyrics_5000.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
+    song_data = pd.read_csv("full_lyric_dataset.csv").drop(columns=['Unnamed: 0']).dropna().reset_index(drop=True)
     # Accuracy results
     knn_results = pd.DataFrame(columns=["Number Neighbors", "Accuracy"])
     random_forest_results = pd.DataFrame(columns=["Max Depth", "Accuracy"])
@@ -87,11 +87,6 @@ class LyricLibrary:
         test_accuracy = accuracy_score(y_test, y_pred)
         return test_accuracy * 100
 
-    # most influential feature
-    def ngram_feature_extraction(self, genre, category):
-        # TODO
-        return
-
     def run_all_models(self, models: dict):
         """Runs a collection of models with different parameters and saves their results"""
         if "knn" in models.keys():
@@ -99,18 +94,17 @@ class LyricLibrary:
                 knn = KNeighborsClassifier(n_neighbors=n, metric='cosine')
                 score = self.ML_pipeline(knn)
                 result = {"Number Neighbors": n, "Accuracy": score}
-                # TODO: Suppress Warning for frame.append
                 self.knn_results = self.knn_results.append(result, ignore_index=True)
         if "forest" in models.keys():
             for depth in models["forest"]:
-                random_forest = RandomForestClassifier(max_depth=depth, min_samples_split=3)
+                random_forest = RandomForestClassifier(max_depth=depth, min_samples_split=2)
                 score = self.ML_pipeline(random_forest)
                 result = {"Max Depth": depth, "Accuracy": score}
                 self.random_forest_results = self.random_forest_results.append(result, ignore_index=True)
         return
 
     def plot_model_accuracy(self):
-        """Plot the accruacy of KNN models with different number of neighbors"""
+        """Plot the accuracy of KNN models with different number of neighbors"""
         xs = self.knn_results["Number Neighbors"]
         y1 = self.knn_results["Accuracy"]
 
@@ -159,11 +153,9 @@ def main():
 
     sample_models = {
         "knn": [3, 5, 7, 9, 11, 13, 15, 17, 19],
-        "forest": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        "forest": [6, 7, 8, 9, 10, 11, 12]
     }
-    random_forest_deep = {
-        "forest": [12, 13, 14, 15, 16, 17, 18, 19, 20]
-    }
+
     library.run_all_models(sample_models)  # run all knn and forest models
 
     print(library.knn_results)
